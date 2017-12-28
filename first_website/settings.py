@@ -10,7 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
+import json
 import os
+
+from django.core.exceptions import ImproperlyConfigured
+
+with open('etc\secrets.json') as secrets_file:
+    secret_key = json.load(secrets_file)
+
+def get_secret_key(setting, secrets=secret_key):
+    try:
+        return secrets[setting]
+    except KeyError:
+        raise ImproperlyConfigured("Set the {} setting".format(setting))
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,13 +33,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'p+1w((m#=mjz4$%2pzo@#9(6$&_5t3_zcb+&@c9he^s(b&)txx'
+# SECRET_KEY = ''
+SECRET_KEY = get_secret_key("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*', ]
 
 # Application definition
 
@@ -76,11 +89,25 @@ WSGI_APPLICATION = 'first_website.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'django',
+        'USER': 'steven',
+<<<<<<< HEAD
+        'PASSWORD': get_secret_key('DB_PASSWORD'),
+=======
+        'PASSWORD': 'XXX',
+>>>>>>> d1938b0fde4f2eb865cb752747502b0c1ee33272
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -118,4 +145,10 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_ROOT = '/var/www/django/html'
+STATIC_PATH = os.path.join(BASE_DIR, 'static')
+
+STATIC_URL = '/static/'  # You may find this is already defined as such.
+STATICFILES_DIRS = (
+    STATIC_PATH,
+)
